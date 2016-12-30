@@ -1,0 +1,7 @@
+# <MethodIndex> <ArgumentValue> <ReturnValue>
+2 1000 LockFreeList add remove
+Thread 0
+1 1 17
+0 1 0
+Thread 1
+1 1 17

@@ -1,0 +1,38 @@
+Requirement:
+* gcc 4.2 or above 
+* Java 6 or above (both JDK and JRE): the official version is preferred and other versions (e.g. OpenJDK) are not tested. 
+* python 2.7 or above 
+* scala 2.9 or above 
+
+Install:
+1. Set the VT_HONE to the directory of veritrace. Set CLASSPATH to VT_HOME.
+2. Compile the tool: go to the directory 'src', choose the proper Makefile according to your OS 
+   (Linux or Mac OS. Windows is not supported for the moment, but you are encouraged to try if 
+   you know how to do it), and run 'make'. You probably need to modify the Makefile if the pathes 
+   are different. 
+3. Compile the JVM agent: go to the directory 'jvmagent', choose the proper Makefile (with necessary 
+   modification) and run 'make'.   
+4. Set configuration: you need to have the file 'vt.conf' before you start to use the tool. Refer to 
+   the two sample files 'vt.conf.mac', 'vt.conf.linux', and do necessary modification. Notice that in 
+   general the variable 'Processors' should be set to the number of processors/cores of your machine. 
+   But this variable is used for parallelizing the verification and the feature is not stable, so we 
+   recommend setting 'Processors' to 1, which disables parallel verification. 
+
+Run VeriTrace: 
+1. Write your concurrent Java program for verification. You need to supply several features in your 
+   class: a non-trivial 'toString' method which converts distinguished objects into distinguished 
+   strings; if there is no constructor that can make a copy of an existing object, you need to supply 
+   a 'clone' method which does a deep copy of objects.
+2. Put your Java source program in the directory 'src/concurrency'. Add the line 'package concurrency;' 
+   at the head of your source program, then run 'make <TestProgram.class>' where 'TestProgramm.java' 
+   is the file name of your source program. The compiled class files will be in 'VT_HOME/concurrency' 
+   directory. 
+3. Write a proper test case. See examples in the directory 'test'.
+4. Run veritrace command with the test case. Occassionally, you need to do some modification in the 
+   generated file. In particular, if there's no constructor making a deep copy and you have implemented 
+   clone method, in the simulation program (the Scala program whose file name starts with 'Simulate') 
+   you need to change the second line in the 'sequentialExecute' method: 
+       	    val obj: T = new T(init) 
+   to 
+	    val obj: T = init.clone() 
+

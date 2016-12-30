@@ -1,0 +1,31 @@
+# VT_HOME = /Users/zhang/VeriTrace
+CLASS_PATH = $(VT_HOME)
+VT_CLASS_PATH = $(VT_HOME)/jtrace
+TEST_PATH = $(VT_HOME)/test
+AGENT_PATH = $(VT_HOME)/jvmagent
+CONCUR_CLASS_PATH = $(VT_HOME)/concurrency
+
+
+JDK_HOME = /Library/Java/JavaVirtualMachines/jdk1.7.0_06.jdk/Contents/Home
+JAVA_HOME = /System/Library/Frameworks/JavaVM.framework/Versions/Current
+JAVA = $(JAVA_HOME)/Commands/java
+JAVAC = $(JAVA_HOME)/Commands/javac
+
+JAVA_SRC = 
+CLASSES = 
+
+LIBS = 
+
+#######################################################################################
+
+#######################################################################################
+
+.SUFFIXES: .java .class 
+
+all: $(CLASSES)
+
+.java.class: 
+	$(JAVAC) -d $(VT_HOME) $<
+
+clean: 
+	rm -fr *~ *.class $(CONCUR_CLASS_PATH)/*.class 

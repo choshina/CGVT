@@ -1,0 +1,13 @@
+Chenyang java1.7.0_76
+zhangyu java1.8.0_91
+
+1. 160830pythonwork modify lineno-?, 
+then python gradualAdd.py, 
+then copy the new created file to VeriTrace1/test/LockFreeListAddRemove
+then cd $VT_HOME,javac test/Lo../Rerun...java
+2. cd tracelog, vi cut, modify the file name that will be created
+vi *.sh, modify cut's argument
+3. cd wglconfig, modify the config
+4. copy preprocess to wgl/
+run
+

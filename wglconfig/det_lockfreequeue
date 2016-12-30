@@ -1,0 +1,6 @@
+Specification:Queue
+Thread:2
+200
+200
+/home/xavi/VeriTrace1/tracelog/book_lockfreequeue_enq_deq.temp.testlog
+/home/xavi/VeriTrace1/tracelog/book_lockfreequeue_enq_deq.temp.jvmlog

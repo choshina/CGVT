@@ -1,0 +1,32 @@
+# <MethodIndex> <ArgumentValue> <ReturnValue>
+2 1000 OptimisticLinkedQueue add remove
+Thread 0
+0 -1 12
+1 26
+0 -1 10
+1 58
+0 -1 3
+1 31
+1 77
+0 -1 13
+1 81
+1 0
+1 14
+0 -1 81
+1 12
+Thread 1
+0 -1 96
+0 -1 3
+1 77
+1 88
+1 62
+0 -1 12
+1 70
+1 80
+1 24
+0 -1 45
+1 97
+0 -1 41
+0 -1 36
+1 96
+1 3
