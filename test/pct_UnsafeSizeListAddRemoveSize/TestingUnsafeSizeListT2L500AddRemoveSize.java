@@ -1,6 +1,5 @@
 // 0: add(int):boolean; 1: remove(int):boolean; 2: size():int; 
-package test.UnsafeSizeListAddRemoveSize ; 
-import src.concurrency.* ; 
+package test.pct_UnsafeSizeListAddRemoveSize ; 
 
 import jtrace.ArgType ; 
 import jtrace.ArgInt ; 
@@ -12,6 +11,8 @@ import java.io.* ;
 import java.util.Random ;
 import java.util.List ;
 import java.util.LinkedList ;
+
+import pct.*;
 
 class VTUnsafeSizeListTest { 
   private UnsafeSizeList data ; 
@@ -53,7 +54,7 @@ class TestThread extends Thread {
     boolean remove__ret ; 
     int size__ret ; 
     for(int i = 0,ej = 0;ej < len;){
-        int opThisBlock = r.nextInt(3);
+        int opThisBlock = r.nextInt(3)+1;
         int[] op = new int[opThisBlock];
         for(int j = 0;j < opThisBlock;j++){
             op[j] = r.nextInt(3);
@@ -105,12 +106,13 @@ class TestThread extends Thread {
     public int getUselen(){
         return uselen;
     }
+}
 
 class TestingUnsafeSizeListT2L500AddRemoveSize { 
   public static void main(String argv[]) { 
     int tdNum = 2, mdNum = 3, trLen = 1500; 
     VTUnsafeSizeListTest testObj = new VTUnsafeSizeListTest() ; 
-    Controller ctl = new Controller(2,3);
+    Controller ctl = new Controller(tdNum,mdNum);
     TraceRecord[][] tr = new TraceRecord[tdNum][trLen] ; 
     TestThread[] thd = new TestThread[tdNum] ; 
     for (int i = 0; i < tdNum; i++) { 
@@ -128,7 +130,7 @@ class TestingUnsafeSizeListT2L500AddRemoveSize {
     try { 
       FileWriter fw = new FileWriter(fn) ; 
       BufferedWriter out = new BufferedWriter(fw) ; 
-      out.write("# <MethodIndex> <ArgumentValue> <ReturnValue>\n") ; 
+      out.write("# <MethodIndex> <ReturnValue> <ArgumentValue>\n") ; 
       out.write("2 500 UnsafeSizeList add remove size\n") ; 
         int[] uslen = new int[tdNum];
     for(int w= 0;w < tdNum;w++){

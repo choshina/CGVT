@@ -1,175 +1,139 @@
-package schedule;
+package pct;
 
 public class Controller {
 	
+	class Block{
+		int blockID;
+		Scheduler scheduler;
+		boolean[] beginFlag;
+		boolean[] endFlag;
+		
+		int[][] thdInfo;
+		
+		public Block(int i){
+			blockID = i;
+			beginFlag = new boolean[threadNumber];
+			endFlag = new boolean[threadNumber];
+			thdInfo = new int[threadNumber][];
+		}
+
+		public void setThdInfo(int tid, int[] opList) {
+			thdInfo[tid] = opList;
+			synchronized(beginFlag){
+				beginFlag[tid] = true;
+				for(int i = 0;i < threadNumber;i++){
+					
+					if(!beginFlag[i]){
+						try {
+							beginFlag.wait();
+						} catch (InterruptedException e) {
+							
+							e.printStackTrace();
+						}
+						return;
+					}
+				}
+				
+				//Testcase t = new Testcase(thdInfo);
+				//boolean f = fb.check(t, 3);
+				
+				int base = opInstruction.calculate(thdInfo);
+			
+				scheduler = new Scheduler(true,base,3);
+				beginFlag.notifyAll();
+				
+				
+				return;
+			}
+			
+		}
+
+		public void handleEnd(int tid) {
+			synchronized(endFlag){
+				endFlag[tid] = true;
+				for(int i = 0;i < threadNumber;i++){
+					
+					if(!endFlag[i]){
+						try {
+							endFlag.wait();
+						} catch (InterruptedException e) {
+							
+							e.printStackTrace();
+						}
+						return;
+					}
+				}
+				endFlag.notifyAll();
+				return;
+			}
+			
+		}
+		
+	
+		
+		
+	}
+	
 	private int threadNumber;
 	
-	//private ThreadInfo[] thdInfo;
-	private int[][] thdInfo;
+	private boolean blockworking;
 	
-	private int[] endFlag;//-1:can't end 1: OK to end
-	
-	private int[] beginFlag;//-1:not ready; 1:ready to begin
-	
-	public byte[] res = {0};
-	
-	public byte[] eres = {1};
-		
-	private Scheduler s;
-	
-	private FBRecorder fb;
-	
-	private boolean fbf;
-	
-	private int depth;
+	private Block[] blockset;
 
-	public Controller(int n){
-		threadNumber = n;
-		
-		endFlag = new int[n];
-		
-		beginFlag = new int[n];
-		
-		thdInfo = new int[n][];
-		
-		for(int i = 0;i < n;i++){
+	private int blockIndex;
+	
+	private OpInstruction opInstruction;
+	
+	//private FBRecorder fb;
+	
+	private byte[] blkcrtlock = new byte[0];
+	private byte[] blkclslock = new byte[0];
+	
+	public Controller(int t,int nop){
+		threadNumber = t;
+		blockworking = false;
+		blockset = new Block[1000];
+		blockIndex = 0;
+		opInstruction = new OpInstruction(nop,"schedref");
+		//fb = new FBRecorder();
+	}
+	
+	public void uploadThreadInfo(int tid, int[] opList){
+		synchronized(blkcrtlock){
 			
-			endFlag[i] = -1;
-			beginFlag[i] = -1;
+			if(!blockworking){
+				blockIndex++;
+				blockset[blockIndex] = new Block(blockIndex);
+				blockworking = true;
+			}
 		}
-		
-		fb = new FBRecorder();
-		
-		fbf = false;
-		
-		depth = 2;
+
+		blockset[blockIndex].setThdInfo(tid,opList);
 		
 	}
 	
-	/*
-	 * to upload the information of thread i. and modify the begin flag, to say that
-	 * the data has been uploaded. 
-	 * as each thread hold its own beginflag domain, no data race would happen.
-	 * 
-	 * */
-	public boolean uploadThreadInfo(int id, int[] opList){
-		int i = id;
+	public void handleEnd(int tid){
+		blockset[blockIndex].handleEnd(tid);
 		
-		try{
-			synchronized(res){
-				thdInfo[i] = opList;
-				
-				beginFlag[i] = 1;
-				
-				if(couldBegin()){//feedback version
+		synchronized(blkclslock){
+			if(blockworking){
+				blockworking = false;
+				try {
+					blkclslock.wait();
+				} catch (InterruptedException e) {
 					
-					Testcase t = new Testcase(thdInfo);
-					fbf = fb.check(t,depth);
-					if(!fbf)
-						return false;
-					s = new Scheduler(threadNumber,getNumInstru(),3);
-					res.notify();
-					return true;
-					
-				}else{
-					res.wait();
-					return fbf;
+					e.printStackTrace();
 				}
-				
-				/*if(couldBegin()){//non-feedback version
-					s = new Scheduler(threadNumber, getNumInstru(), 3);
-					res.notify();
-					
-				}else{
-					res.wait();
-				}*/
-			}
-		}catch(InterruptedException e){
-			e.printStackTrace();
-		}
-		return false;
-		
-		
-	}
-	
-	private int[] getNumInstru(){
-		int[] w = new int[threadNumber];
-		for(int i = 0;i < threadNumber;i++){
-			w[i] = 0;
-			for(int j = 0;j < thdInfo[i].length;j++){
-				w[i] = w[i] + getNumInstructions(thdInfo[i][j]);
-				System.out.println("w[i]"+w[i]);
-			}
 			
-		}
-		return w;
-	}
-	
-	private int getNumInstructions(int op){
-		int result = 0;
-		switch(op){
-		case 0:
-			result = 7;
-			break;
-		case 1:
-			result = 5;
-			break;
-		}
-		return result;
-	}
-	
-	
-	/*
-	 * if this returns true, it says that the information of all the threads has been
-	 * uploaded, and the block could begin.
-	 * 
-	 * */
-	private boolean couldBegin(){
-		for(int i = 0;i < threadNumber;i++){
-			if(beginFlag[i]!=1){
-				return false;
+				return;
 			}
+			blkclslock.notifyAll();
 		}
-		return true;
-	}
 	
-	/*
-	 * if the @toTheEnd could return true, this can also return true;  
-	 * 
-	 * */
-	public boolean couldEnd(){
-		for(int i = 0;i < threadNumber;i++){
-			if(endFlag[i]!=1){
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	public void handleEnd(int i){
-		try{
-			synchronized(eres){
-				endFlag[i] = 1;
-				
-				if(couldEnd()){
-					eres.notify();
-				}else{
-					eres.wait();
-				}
-			}
-			
-		}catch(InterruptedException e){
-			e.printStackTrace();
-		}
-		
 	}
 	
 	public Scheduler getScheduler(){
-		return s;
+		return blockset[blockIndex].scheduler;
 	}
 	
-	
-	
-	
 }
-
